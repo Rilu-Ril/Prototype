@@ -12,6 +12,10 @@
 		7E0EB33F1DF4017800B6F97A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7E0EB33D1DF4017800B6F97A /* Main.storyboard */; };
 		7E0EB3411DF4017800B6F97A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7E0EB3401DF4017800B6F97A /* Assets.xcassets */; };
 		7E0EB3441DF4017800B6F97A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7E0EB3421DF4017800B6F97A /* LaunchScreen.storyboard */; };
+		7E0EB34C1DF4025900B6F97A /* MrPig.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 7E0EB34B1DF4025900B6F97A /* MrPig.scnassets */; };
+		7E0EB3511DF4029300B6F97A /* GameHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0EB34E1DF4029300B6F97A /* GameHelper.swift */; };
+		7E0EB3521DF4029300B6F97A /* GameUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0EB34F1DF4029300B6F97A /* GameUtils.swift */; };
+		7E0EB3531DF4029300B6F97A /* SCNAction+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0EB3501DF4029300B6F97A /* SCNAction+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +26,10 @@
 		7E0EB3401DF4017800B6F97A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7E0EB3431DF4017800B6F97A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7E0EB3451DF4017800B6F97A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7E0EB34B1DF4025900B6F97A /* MrPig.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = MrPig.scnassets; sourceTree = "<group>"; };
+		7E0EB34E1DF4029300B6F97A /* GameHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameHelper.swift; sourceTree = "<group>"; };
+		7E0EB34F1DF4029300B6F97A /* GameUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameUtils.swift; sourceTree = "<group>"; };
+		7E0EB3501DF4029300B6F97A /* SCNAction+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SCNAction+Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,12 +64,24 @@
 			children = (
 				7E0EB3391DF4017800B6F97A /* AppDelegate.swift */,
 				7E0EB33B1DF4017800B6F97A /* ViewController.swift */,
+				7E0EB34D1DF4029300B6F97A /* GameUtils */,
+				7E0EB34B1DF4025900B6F97A /* MrPig.scnassets */,
 				7E0EB33D1DF4017800B6F97A /* Main.storyboard */,
 				7E0EB3401DF4017800B6F97A /* Assets.xcassets */,
 				7E0EB3421DF4017800B6F97A /* LaunchScreen.storyboard */,
 				7E0EB3451DF4017800B6F97A /* Info.plist */,
 			);
 			path = Pig;
+			sourceTree = "<group>";
+		};
+		7E0EB34D1DF4029300B6F97A /* GameUtils */ = {
+			isa = PBXGroup;
+			children = (
+				7E0EB34E1DF4029300B6F97A /* GameHelper.swift */,
+				7E0EB34F1DF4029300B6F97A /* GameUtils.swift */,
+				7E0EB3501DF4029300B6F97A /* SCNAction+Extensions.swift */,
+			);
+			path = GameUtils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -126,6 +146,7 @@
 				7E0EB3441DF4017800B6F97A /* LaunchScreen.storyboard in Resources */,
 				7E0EB3411DF4017800B6F97A /* Assets.xcassets in Resources */,
 				7E0EB33F1DF4017800B6F97A /* Main.storyboard in Resources */,
+				7E0EB34C1DF4025900B6F97A /* MrPig.scnassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,7 +158,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E0EB33C1DF4017800B6F97A /* ViewController.swift in Sources */,
+				7E0EB3531DF4029300B6F97A /* SCNAction+Extensions.swift in Sources */,
+				7E0EB3521DF4029300B6F97A /* GameUtils.swift in Sources */,
 				7E0EB33A1DF4017800B6F97A /* AppDelegate.swift in Sources */,
+				7E0EB3511DF4029300B6F97A /* GameHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
