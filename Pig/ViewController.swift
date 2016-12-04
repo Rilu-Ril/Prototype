@@ -25,6 +25,13 @@ class ViewController: UIViewController {
     var driveLeftAction: SCNAction!
     var driveRightAction: SCNAction!
     
+    var jumpLeftAction: SCNAction!
+    var jumpRightAction: SCNAction!
+    var jumpForwardAction: SCNAction!
+    var jumpBackwardAction: SCNAction!
+    
+    var triggerGameOver: SCNAction!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScenes()
@@ -55,6 +62,66 @@ class ViewController: UIViewController {
     func setupActions() {
         driveLeftAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3Make(-2.0, 0, 0), duration: 1.0))
         driveRightAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3Make(2.0, 0, 0), duration: 1.0))
+        
+        let duration = 0.2
+        
+        let bounceUpAction = SCNAction.moveBy(x: 0, y: 1.0, z: 0, duration:
+            duration * 0.5)
+        let bounceDownAction = SCNAction.moveBy(x: 0, y: -1.0, z: 0, duration:
+            duration * 0.5)
+        
+        bounceUpAction.timingMode = .easeOut
+        bounceDownAction.timingMode = .easeIn
+
+        let bounceAction = SCNAction.sequence([bounceUpAction, bounceDownAction])
+
+        let moveLeftAction = SCNAction.moveBy(x: -1.0, y: 0, z: 0, duration:
+            duration)
+        let moveRightAction = SCNAction.moveBy(x: 1.0, y: 0, z: 0, duration:
+            duration)
+        let moveForwardAction = SCNAction.moveBy(x: 0, y: 0, z: -1.0, duration:
+            duration)
+        let moveBackwardAction = SCNAction.moveBy(x: 0, y: 0, z: 1.0, duration:
+            duration)
+        let turnLeftAction = SCNAction.rotateTo(x: 0, y: convertToRadians(angle: -90), z: 0,
+                                                duration: duration, usesShortestUnitArc: true)
+        
+        let turnRightAction = SCNAction.rotateTo(x: 0, y: convertToRadians(angle: 90), z: 0,
+                                                 duration: duration, usesShortestUnitArc: true)
+        let turnForwardAction = SCNAction.rotateTo(x: 0, y: convertToRadians(angle: 180), z: 0,
+                                                   duration: duration, usesShortestUnitArc: true)
+        let turnBackwardAction = SCNAction.rotateTo(x: 0, y: convertToRadians(angle: 0), z: 0,
+                                                    duration: duration, usesShortestUnitArc: true)
+        
+        jumpLeftAction = SCNAction.group([turnLeftAction, bounceAction,
+                                          moveLeftAction])
+        jumpRightAction = SCNAction.group([turnRightAction, bounceAction,
+                                           moveRightAction])
+        jumpForwardAction = SCNAction.group([turnForwardAction, bounceAction,
+                                             moveForwardAction])
+        jumpBackwardAction = SCNAction.group([turnBackwardAction, bounceAction,
+                                              moveBackwardAction])
+        
+        
+        
+        
+        /**** game over *****/
+        let spinAround = SCNAction.rotateBy(x: 0, y: convertToRadians(angle: 720), z: 0,
+                                             duration: 2.0)
+        let riseUp = SCNAction.moveBy(x: 0, y: 10, z: 0, duration: 2.0)
+        let fadeOut = SCNAction.fadeOpacity(to: 0, duration: 2.0)
+        let goodByePig = SCNAction.group([spinAround, riseUp, fadeOut])
+        // 2
+        let gameOver = SCNAction.run { (node:SCNNode) -> Void in
+            self.pigNode.position = SCNVector3(x:0, y:0, z:0)
+            self.pigNode.opacity = 1.0
+            self.startSplash()
+        }
+        
+        triggerGameOver = SCNAction.sequence([goodByePig, gameOver])
+        
+        
+        
     }
     func setupTraffic() {
         for node in trafficNode.childNodes {
@@ -76,6 +143,29 @@ class ViewController: UIViewController {
         
     }
     func setupGestures() {
+        let swipeRight:UISwipeGestureRecognizer =
+            UISwipeGestureRecognizer(target: self, action:
+                #selector(ViewController.handleGesture(sender:)))
+        swipeRight.direction = .right
+        scnView.addGestureRecognizer(swipeRight)
+        
+        let swipeLeft:UISwipeGestureRecognizer = UISwipeGestureRecognizer(target:
+            self, action: #selector(ViewController.handleGesture(sender:)))
+        swipeLeft.direction = .left
+        scnView.addGestureRecognizer(swipeLeft)
+        
+        let swipeForward:UISwipeGestureRecognizer =
+            UISwipeGestureRecognizer(target: self, action:
+                #selector(ViewController.handleGesture(sender:)))
+        swipeForward.direction = .up
+        scnView.addGestureRecognizer(swipeForward)
+        
+        let swipeBackward:UISwipeGestureRecognizer =
+            UISwipeGestureRecognizer(target: self, action:
+                #selector(ViewController.handleGesture(sender:)))
+        swipeBackward.direction = .down
+        scnView.addGestureRecognizer(swipeBackward)
+        
     }
     func setupSounds() {
     }
@@ -94,6 +184,8 @@ class ViewController: UIViewController {
     func stopGame() {
         game.state = .GameOver
         game.reset()
+        pigNode.runAction(triggerGameOver)
+        
     }
     
     func startSplash() {
@@ -108,6 +200,32 @@ class ViewController: UIViewController {
     
     
     
+    func handleGesture(sender:UISwipeGestureRecognizer){
+        // 2
+        
+        //stopGame()
+       // return
+        
+        guard game.state == .Playing else {
+            return
+        }
+        // 3
+        switch sender.direction {
+        case UISwipeGestureRecognizerDirection.up:
+            pigNode.runAction(jumpForwardAction)
+        case UISwipeGestureRecognizerDirection.down:
+            pigNode.runAction(jumpBackwardAction)
+        case UISwipeGestureRecognizerDirection.left:
+            if pigNode.position.x >  -15 {
+                pigNode.runAction(jumpLeftAction)
+            }
+        case UISwipeGestureRecognizerDirection.right:
+            if pigNode.position.x < 15 {
+                pigNode.runAction(jumpRightAction)
+            } default:
+            break
+        }
+    }
     
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
