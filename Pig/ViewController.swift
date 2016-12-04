@@ -23,6 +23,8 @@ class ViewController: UIViewController {
     
     var lightFollowNode: SCNNode!
     
+    var trafficNode: SCNNode!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScenes()
@@ -47,8 +49,9 @@ class ViewController: UIViewController {
         cameraNode.addChildNode(game.hudNode)
         cameraFollowNode = gameScene.rootNode.childNode(withName: "FollowCamera", recursively: true)!
         lightFollowNode = gameScene.rootNode.childNode(withName: "FollowLight", recursively: true)!
-        
+        trafficNode = gameScene.rootNode.childNode(withName: "Traffic", recursively: true)!
     }
+    
     func setupActions() {
     }
     func setupTraffic() {
