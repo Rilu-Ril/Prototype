@@ -17,13 +17,13 @@ class ViewController: UIViewController {
     var gameScene:SCNScene!
     var splashScene:SCNScene!
     var pigNode: SCNNode!
-    
     var cameraNode: SCNNode!
     var cameraFollowNode: SCNNode!
-    
     var lightFollowNode: SCNNode!
-    
     var trafficNode: SCNNode!
+    
+    var driveLeftAction: SCNAction!
+    var driveRightAction: SCNAction!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,8 +53,27 @@ class ViewController: UIViewController {
     }
     
     func setupActions() {
+        driveLeftAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3Make(-2.0, 0, 0), duration: 1.0))
+        driveRightAction = SCNAction.repeatForever(SCNAction.move(by: SCNVector3Make(2.0, 0, 0), duration: 1.0))
     }
     func setupTraffic() {
+        for node in trafficNode.childNodes {
+            if node.name?.contains("Bus") == true {
+                driveLeftAction.speed = 1.0
+                driveRightAction.speed = 1.0
+            }else {
+                driveLeftAction.speed = 2.0
+                driveRightAction.speed = 2.0
+            }
+            
+            if node.eulerAngles.y > 0 {
+                node.runAction(driveLeftAction)
+            } else {
+                node.runAction(driveRightAction)
+            }
+        }
+        
+        
     }
     func setupGestures() {
     }
