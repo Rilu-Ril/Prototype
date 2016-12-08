@@ -32,6 +32,25 @@ class ViewController: UIViewController {
     
     var triggerGameOver: SCNAction!
     
+    var collisionNode: SCNNode!
+    var frontCollisionNode: SCNNode!
+    var backCollisionNode: SCNNode!
+    var leftCollisionNode: SCNNode!
+    var rightCollisionNode: SCNNode!
+    
+    let BitMaskPig = 1
+    let BitMaskVehicle = 2
+    let BitMaskObstacle = 4
+    let BitMaskFront = 8
+    let BitMaskBack = 16
+    let BitMaskLeft = 32
+    let BitMaskRight = 64
+    let BitMaskCoin = 128
+    let BitMaskHouse = 256
+    
+    var activeCollisionsBitMask: Int = 0
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScenes()
@@ -49,14 +68,33 @@ class ViewController: UIViewController {
         gameScene = SCNScene(named: "/MrPig.scnassets/GameScene.scn")
         splashScene = SCNScene(named: "/MrPig.scnassets/SplashScene1.scn")
         scnView.scene = splashScene
+        scnView.delegate = self
+        gameScene.physicsWorld.contactDelegate = self
     }
     func setupNodes() {
         pigNode = gameScene.rootNode.childNode(withName: "MrPig", recursively: true)!
         cameraNode = gameScene.rootNode.childNode(withName: "camera", recursively:  true)!
         cameraNode.addChildNode(game.hudNode)
+        
         cameraFollowNode = gameScene.rootNode.childNode(withName: "FollowCamera", recursively: true)!
         lightFollowNode = gameScene.rootNode.childNode(withName: "FollowLight", recursively: true)!
         trafficNode = gameScene.rootNode.childNode(withName: "Traffic", recursively: true)!
+        collisionNode = gameScene.rootNode.childNode(withName: "Collision",  recursively: true)!
+        frontCollisionNode = gameScene.rootNode.childNode(withName: "Front",
+                                                                  recursively: true)!
+        backCollisionNode = gameScene.rootNode.childNode(withName: "Back",
+                                                                 recursively: true)!
+        leftCollisionNode = gameScene.rootNode.childNode(withName: "Left",
+                                                                 recursively: true)!
+        rightCollisionNode = gameScene.rootNode.childNode(withName: "Right",
+                                                                  recursively: true)!
+        
+        pigNode.physicsBody?.contactTestBitMask = BitMaskVehicle | BitMaskCoin | BitMaskHouse
+        frontCollisionNode.physicsBody?.contactTestBitMask = BitMaskObstacle
+        backCollisionNode.physicsBody?.contactTestBitMask = BitMaskObstacle
+        leftCollisionNode.physicsBody?.contactTestBitMask = BitMaskObstacle
+        rightCollisionNode.physicsBody?.contactTestBitMask = BitMaskObstacle
+        
     }
     
     func setupActions() {
@@ -201,15 +239,30 @@ class ViewController: UIViewController {
     
     
     func handleGesture(sender:UISwipeGestureRecognizer){
-        // 2
         
         //stopGame()
-       // return
+        //return
         
         guard game.state == .Playing else {
             return
         }
-        // 3
+        
+        let activeFrontCollision = activeCollisionsBitMask & BitMaskFront ==
+        BitMaskFront
+        let activeBackCollision = activeCollisionsBitMask & BitMaskBack ==
+        BitMaskBack
+        let activeLeftCollision = activeCollisionsBitMask & BitMaskLeft ==
+        BitMaskLeft
+        let activeRightCollision = activeCollisionsBitMask & BitMaskRight ==
+        BitMaskRight
+        // 2
+        guard (sender.direction == .up && !activeFrontCollision) ||
+            (sender.direction == .down && !activeBackCollision) ||
+            (sender.direction == .left && !activeLeftCollision) ||
+            (sender.direction == .right && !activeRightCollision) else {
+                return
+        }
+        
         switch sender.direction {
         case UISwipeGestureRecognizerDirection.up:
             pigNode.runAction(jumpForwardAction)
@@ -226,6 +279,9 @@ class ViewController: UIViewController {
             break
         }
     }
+    func updatePositions() {
+        collisionNode.position = pigNode.presentation.position
+    }
     
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -239,7 +295,91 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
 }
+
+extension ViewController: SCNSceneRendererDelegate {
+    func renderer(_ renderer: SCNSceneRenderer, didApplyAnimationsAtTime time: TimeInterval) {
+        guard game.state == .Playing else {
+            return
+        }
+        game.updateHUD()
+        updatePositions()
+    }
+}
+
+extension ViewController: SCNPhysicsContactDelegate {
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        guard game.state == .Playing else {
+            return
+        }
+        var collisionBoxNode: SCNNode!
+        if contact.nodeA.physicsBody?.categoryBitMask == BitMaskObstacle {
+            collisionBoxNode = contact.nodeB
+        } else {
+            collisionBoxNode = contact.nodeA
+        }
+        activeCollisionsBitMask |= collisionBoxNode.physicsBody!.categoryBitMask
+        
+        var contactNode: SCNNode!
+        if contact.nodeA.physicsBody?.categoryBitMask == BitMaskPig {
+            contactNode = contact.nodeB
+        } else {
+            contactNode = contact.nodeA
+        }
+        
+        if contactNode.physicsBody?.categoryBitMask == BitMaskVehicle {
+            stopGame()
+        }
+        if contactNode.physicsBody?.categoryBitMask == BitMaskCoin {
+            contactNode.isHidden = true
+            contactNode.runAction(SCNAction.waitForDurationThenRunBlock(duration: 60)
+            { (node: SCNNode!) -> Void in
+                node.isHidden = false
+            })
+            game.collectCoin()
+        }
+    }
+    
+    func physicsWorld(_ world: SCNPhysicsWorld, didEnd contact: SCNPhysicsContact) {
+        guard game.state == .Playing else {
+            return
+        }
+        // 8
+        var collisionBoxNode: SCNNode!
+        
+        if contact.nodeA.physicsBody?.categoryBitMask == BitMaskObstacle {
+            collisionBoxNode = contact.nodeB
+        } else {
+            collisionBoxNode = contact.nodeA
+        }
+        
+        activeCollisionsBitMask &=  ~collisionBoxNode.physicsBody!.categoryBitMask
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
