@@ -206,6 +206,28 @@ class ViewController: UIViewController {
         
     }
     func setupSounds() {
+        if game.state == .TapToPlay {
+            let music = SCNAudioSource(fileNamed: "MrPig.scnassets/Audio/Music.mp3")!
+                music.volume = 0.3;
+                music.loops = true
+                music.shouldStream = true
+                music.isPositional = false
+            let musicPlayer = SCNAudioPlayer(source: music)
+            splashScene.rootNode.addAudioPlayer(musicPlayer)
+        }   else if game.state == .Playing {
+            let traffic = SCNAudioSource(fileNamed: "MrPig.scnassets/Audio/Traffic.mp3")!
+                traffic.volume = 0.3
+                traffic.loops = true
+                traffic.shouldStream = true
+                traffic.isPositional = true
+            let trafficPlayer = SCNAudioPlayer(source: traffic)
+            gameScene.rootNode.addAudioPlayer(trafficPlayer)
+            game.loadSound(name: "Jump", fileNamed: "MrPig.scnassets/Audio/Jump.wav")
+            game.loadSound(name: "Blocked", fileNamed: "MrPig.scnassets/Audio/Blocked.wav")
+            game.loadSound(name: "Crash", fileNamed: "MrPig.scnassets/Audio/Crash.wav")
+            game.loadSound(name: "CollectCoin", fileNamed: "MrPig.scnassets/Audio/CollectCoin.wav")
+            game.loadSound(name: "BankCoin", fileNamed: "MrPig.scnassets/Audio/BankCoin.wav")
+        }
     }
     
     func startGame() {
@@ -260,6 +282,7 @@ class ViewController: UIViewController {
             (sender.direction == .down && !activeBackCollision) ||
             (sender.direction == .left && !activeLeftCollision) ||
             (sender.direction == .right && !activeRightCollision) else {
+                game.playSound(node: pigNode, name: "Blocked")
                 return
         }
         
@@ -278,6 +301,7 @@ class ViewController: UIViewController {
             } default:
             break
         }
+        game.playSound(node: pigNode, name: "Jump")
     }
     func updatePositions() {
         collisionNode.position = pigNode.presentation.position
@@ -342,15 +366,24 @@ extension ViewController: SCNPhysicsContactDelegate {
         }
         
         if contactNode.physicsBody?.categoryBitMask == BitMaskVehicle {
+            game.playSound(node: pigNode, name: "Crash")
             stopGame()
+            
         }
         if contactNode.physicsBody?.categoryBitMask == BitMaskCoin {
+          
             contactNode.isHidden = true
             contactNode.runAction(SCNAction.waitForDurationThenRunBlock(duration: 60)
             { (node: SCNNode!) -> Void in
                 node.isHidden = false
             })
             game.collectCoin()
+            game.playSound(node: pigNode, name: "CollectCoin")
+        }
+        if contactNode.physicsBody?.categoryBitMask == BitMaskHouse {
+            if game.bankCoins() == true {
+                game.playSound(node: pigNode, name: "BankCoin")
+            }
         }
     }
     
