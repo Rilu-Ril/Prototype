@@ -13,6 +13,8 @@ import SpriteKit
 
 class ViewController: UIViewController {
     let game = GameHelper.sharedInstance
+    let panel = Panel.sharedInstance
+    var actions:[SCNAction]!
     var scnView:SCNView!
     var gameScene:SCNScene!
     var splashScene:SCNScene!
@@ -47,35 +49,116 @@ class ViewController: UIViewController {
     let BitMaskRight = 64
     let BitMaskCoin = 128
     let BitMaskHouse = 256
-    
+    var upButton: UIButton!
+    var downButton: UIButton!
+    var leftButton: UIButton!
+    var rightButton: UIButton!
+    var runButton: UIButton!
+    var panelView: UIView!
     var activeCollisionsBitMask: Int = 0
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+       actions = [SCNAction]()
+        
         setupScenes()
         setupNodes()
         setupActions()
+        setupPanel()
         setupTraffic()
         setupGestures()
         setupSounds()
+        
         // Do any additional setup after loading the view, typically from a nib.
     }
+    
+    func setupPanel() {
+        let panelY = self.view.frame.height - 200
+        panelView = UIView(frame: CGRect(x: 0, y: panelY, width: self.view.frame.width, height: 150))
+        panelView.backgroundColor = UIColor.clear
+        
+        upButton = UIButton(type: UIButtonType.custom)
+        upButton.frame = CGRect(x: 75, y: 25, width: 50, height: 50)
+        upButton.setImage(UIImage(named: "up") , for: UIControlState.normal)
+        upButton.addTarget(self, action: #selector(ViewController.upButtonClicked), for: UIControlEvents.touchUpInside)
+        upButton.adjustsImageWhenHighlighted = false
+        
+        downButton = UIButton(type: UIButtonType.custom)
+        downButton.frame = CGRect(x: 75, y: 125, width: 50, height: 50)
+        downButton.setImage(UIImage(named: "down") , for: UIControlState.normal)
+        downButton.addTarget(self, action: #selector(ViewController.downButtonClicked), for: UIControlEvents.touchUpInside)
+        downButton.adjustsImageWhenHighlighted = false
+        
+        leftButton = UIButton(type: UIButtonType.custom)
+        leftButton.frame = CGRect(x: 25, y: 75, width: 50, height: 50)
+        leftButton.setImage(UIImage(named: "left") , for: UIControlState.normal)
+        leftButton.addTarget(self, action: #selector(ViewController.leftButtonClicked), for: UIControlEvents.touchUpInside)
+        leftButton.adjustsImageWhenHighlighted = false
+        
+        rightButton = UIButton(type: UIButtonType.custom)
+        rightButton.frame = CGRect(x: 125, y: 75, width: 50, height: 50)
+        rightButton.setImage(UIImage(named: "right") , for: UIControlState.normal)
+        rightButton.addTarget(self, action: #selector(ViewController.rightButtonClicked), for: UIControlEvents.touchUpInside)
+        rightButton.adjustsImageWhenHighlighted = false
+        
+        
+        runButton = UIButton(type: UIButtonType.custom)
+        runButton.frame = CGRect(x: 275, y: 75, width: 50, height: 50)
+        runButton.setImage(UIImage(named: "run") , for: UIControlState.normal)
+        runButton.addTarget(self, action: #selector(ViewController.runButtonClicked), for: UIControlEvents.touchUpInside)
+        runButton.adjustsImageWhenHighlighted = false
+        
+        
+        let img = UIImageView(image: #imageLiteral(resourceName: "panel"))
+        img.contentMode = .bottom
+        
+        panelView.addSubview(img)
+        panelView.addSubview(upButton)
+        panelView.addSubview(downButton)
+        panelView.addSubview(leftButton)
+        panelView.addSubview(rightButton)
+        panelView.addSubview(runButton)
+        scnView.addSubview(panelView)
+    }
+    func upButtonClicked(){
+       actions.append(jumpForwardAction)
+    }
+    func downButtonClicked(){
+        actions.append(jumpBackwardAction)
+    }
+    func leftButtonClicked(){
+        actions.append(jumpLeftAction)
+    }
+    func rightButtonClicked(){
+        actions.append(jumpRightAction)
+    }
+    func runButtonClicked(){
+        let sequence = SCNAction.sequence(actions)
+       pigNode.runAction(sequence)
+        actions.removeAll()
+    }
+
+    
 
     func setupScenes() {
         scnView = SCNView(frame: self.view.frame)
         self.view.addSubview(scnView)
         gameScene = SCNScene(named: "/MrPig.scnassets/GameScene.scn")
         splashScene = SCNScene(named: "/MrPig.scnassets/SplashScene1.scn")
+        
         scnView.scene = splashScene
         scnView.delegate = self
         gameScene.physicsWorld.contactDelegate = self
+        
+       
+        
     }
     func setupNodes() {
         pigNode = gameScene.rootNode.childNode(withName: "MrPig", recursively: true)!
         cameraNode = gameScene.rootNode.childNode(withName: "camera", recursively:  true)!
         cameraNode.addChildNode(game.hudNode)
-        
         cameraFollowNode = gameScene.rootNode.childNode(withName: "FollowCamera", recursively: true)!
         lightFollowNode = gameScene.rootNode.childNode(withName: "FollowLight", recursively: true)!
         trafficNode = gameScene.rootNode.childNode(withName: "Traffic", recursively: true)!
@@ -333,6 +416,7 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 }
+
 
 extension ViewController: SCNSceneRendererDelegate {
     func renderer(_ renderer: SCNSceneRenderer, didApplyAnimationsAtTime time: TimeInterval) {

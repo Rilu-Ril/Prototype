@@ -30,6 +30,33 @@ public enum GameStateType {
   case GameOver
 }
 
+class Panel {
+    var panelNode: SCNNode!
+    static let sharedInstance = Panel()
+    
+    
+    private init() {
+        let skScene = SKScene(size: CGSize(width: 200, height: 200))
+        skScene.backgroundColor = UIColor.black
+        
+    
+        
+        let plane = SCNPlane(width: 5, height: 1)
+        let material = SCNMaterial()
+        material.lightingModel = SCNMaterial.LightingModel.constant
+        material.isDoubleSided = true
+        material.diffuse.contents = skScene
+        plane.materials = [material]
+        
+        panelNode = SCNNode(geometry: plane)
+        panelNode.rotation = SCNVector4(x: 1, y: 0, z: 0, w: 3.14159265)
+        panelNode.position = SCNVector3(x:0, y: 0, z: -8)
+        panelNode.name = "panel"
+        
+        
+    }
+}
+
 class GameHelper {
   
   var coinsBanked:Int
@@ -72,7 +99,7 @@ class GameHelper {
     hudNode = SCNNode(geometry: plane)
     hudNode.name = "HUD"
     hudNode.rotation = SCNVector4(x: 1, y: 0, z: 0, w: 3.14159265)
-    hudNode.position = SCNVector3(x:0, y: 1.8, z: -5)
+    hudNode.position = SCNVector3(x:0, y: 0, z: 0)
   }
   
   func updateHUD() {
