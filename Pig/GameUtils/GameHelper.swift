@@ -56,6 +56,32 @@ class Panel {
         
     }
 }
+class SidePanel {
+    var panelNode: SCNNode!
+    static let sharedInstance = SidePanel()
+    
+    
+    private init() {
+        let skScene = SKScene(size: CGSize(width: 50, height: 400))
+        skScene.backgroundColor = UIColor.black
+        
+        
+        
+        let plane = SCNPlane(width: 5, height: 1)
+        let material = SCNMaterial()
+        material.lightingModel = SCNMaterial.LightingModel.constant
+        material.isDoubleSided = true
+        material.diffuse.contents = skScene
+        plane.materials = [material]
+        
+        panelNode = SCNNode(geometry: plane)
+        panelNode.rotation = SCNVector4(x: 1, y: 0, z: 0, w: 3.14159265)
+        panelNode.position = SCNVector3(x:0, y: 0, z: -8)
+        panelNode.name = "sidepanel"
+        
+        
+    }
+}
 
 class GameHelper {
   

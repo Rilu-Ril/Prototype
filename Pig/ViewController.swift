@@ -9,12 +9,19 @@
 import UIKit
 import SceneKit
 import SpriteKit
-
+enum Actions {
+    case up
+    case down
+    case left
+    case right
+}
 
 class ViewController: UIViewController {
+    let commands = ["up", "down", "left", "right"]
     let game = GameHelper.sharedInstance
     let panel = Panel.sharedInstance
-    var actions:[SCNAction]!
+    let sidePanel = SidePanel.sharedInstance
+    var actions:[(SCNAction, Actions)]!
     var scnView:SCNView!
     var gameScene:SCNScene!
     var splashScene:SCNScene!
@@ -55,18 +62,20 @@ class ViewController: UIViewController {
     var rightButton: UIButton!
     var runButton: UIButton!
     var panelView: UIView!
+    var sidePanelView: UIView!
     var activeCollisionsBitMask: Int = 0
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-       actions = [SCNAction]()
+        actions = [(SCNAction, Actions)]()
         
         setupScenes()
         setupNodes()
         setupActions()
         setupPanel()
+        setSidePanel()
         setupTraffic()
         setupGestures()
         setupSounds()
@@ -122,21 +131,51 @@ class ViewController: UIViewController {
         panelView.addSubview(runButton)
         scnView.addSubview(panelView)
     }
+    func setSidePanel() {
+        let panelx = self.view.frame.width - 50
+        let height = self.view.frame.height - 200
+        sidePanelView = UIView(frame: CGRect(x: panelx, y: 0, width: self.view.frame.width, height: height))
+        sidePanelView.backgroundColor = UIColor.clear
+        let img = UIImageView(image: #imageLiteral(resourceName: "panel"))
+        img.contentMode = .right
+        sidePanelView.addSubview(img)
+        scnView.addSubview(sidePanelView)
+        
+    }
+    func updatesidePanel() {
+        
+        let x: Int = Int(self.view.frame.width) - 50
+        var i = 0
+        for (_, t) in actions
+        {
+            let y: Int = i * 50
+            let imageView = UIImageView(frame: CGRect(x: 0, y: y, width: 50, height: 50))
+            imageView.image = UIImage(named: commands[t.hashValue])
+            imageView.contentMode = .scaleAspectFit
+            sidePanelView.addSubview(imageView)
+            
+            i += 1
+        }
+    }
     func upButtonClicked(){
-       actions.append(jumpForwardAction)
+       actions.append((jumpForwardAction, .up))
+        updatesidePanel()
     }
     func downButtonClicked(){
-        actions.append(jumpBackwardAction)
+        actions.append((jumpBackwardAction, .down))
+        updatesidePanel()
     }
     func leftButtonClicked(){
-        actions.append(jumpLeftAction)
+        actions.append((jumpLeftAction, .left))
+        updatesidePanel()
     }
     func rightButtonClicked(){
-        actions.append(jumpRightAction)
+        actions.append((jumpRightAction, .right))
+        updatesidePanel()
     }
     func runButtonClicked(){
-        let sequence = SCNAction.sequence(actions)
-       pigNode.runAction(sequence)
+        let sequence = SCNAction.sequence(actions.map{$0.0})
+        pigNode.runAction(sequence)
         actions.removeAll()
     }
 
